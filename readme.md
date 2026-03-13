@@ -43,6 +43,12 @@
 - [Who's it for?](#whos-it-for)
 - [The Firefly III eco-system](#the-firefly-iii-eco-system)
 - [Getting Started](#getting-started)
+- [Running on macOS (Local Docker)](#running-on-macos-local-docker)
+  - [Prerequisites](#prerequisites)
+  - [One-click launcher app](#one-click-launcher-app)
+  - [Start and stop scripts](#start-and-stop-scripts)
+  - [Data storage](#data-storage)
+- [Importing Statements](#importing-statements)
 - [Contributing](#contributing)
 - [Support the development of Firefly III](#support-the-development-of-firefly-iii)
 - [License](#license)
@@ -130,6 +136,97 @@ There are many ways to run Firefly III
 7. You can [install it on Cloudron](https://cloudron.io/store/org.fireflyiii.cloudronapp.html).
 8. You can [install it on Lando](https://gist.github.com/ArtisKrumins/ccb24f31d6d4872b57e7c9343a9d1bf0).
 9. You can [install it on Yunohost](https://github.com/YunoHost-Apps/firefly-iii).
+
+## Running on macOS (Local Docker)
+
+This repository includes a self-contained macOS launcher that runs Firefly III entirely on your Mac using Docker. No cloud account or server is required. All data stays local.
+
+### Prerequisites
+
+- [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop/) installed (does **not** need to be manually started — the launcher handles that)
+- macOS 12 Monterey or later
+- Python 3 (ships with macOS, used for secure key generation on first run)
+
+### One-click launcher app
+
+**`Firefly III.app`** is a native macOS application bundle in the root of this repository. Double-click it from Finder to get a menu with three options:
+
+| Option | What it does |
+|---|---|
+| **Open Firefly III** | Starts Docker Desktop if not running, spins up all containers, opens `http://localhost` in your browser |
+| **Import Statements** | Opens a Terminal session to parse bank/credit card statements and produce import-ready CSV files |
+| **Stop Firefly III and Close** | Shuts down all Firefly containers cleanly |
+
+You can also drag `Firefly III.app` into your `/Applications` folder or pin it to the Dock.
+
+### Start and stop scripts
+
+Two plain shell scripts are available if you prefer the terminal, or if you want to automate things:
+
+| Script | Purpose |
+|---|---|
+| [`start-firefly.command`](start-firefly.command) | Bootstraps config files on first run, starts Docker Desktop if needed, starts containers, opens browser |
+| [`stop-firefly.command`](stop-firefly.command) | Stops and removes all running Firefly containers |
+
+Both scripts are double-clickable from Finder as well (`*.command` files open in Terminal on macOS).
+
+**First run behaviour:** on the first launch, `start-firefly.command` automatically downloads the official Docker Compose file and configuration templates into `.firefly-docker/`, generates a secure random `APP_KEY` (32 chars) and a random database password, and writes them into `.firefly-docker/.env` and `.firefly-docker/.db.env`. You do not need to edit any files manually.
+
+**Subsequent runs:** configuration files are reused as-is. Containers are re-pulled from Docker Hub to pick up upstream updates.
+
+### Data storage
+
+All data is stored **locally on your Mac** inside Docker-managed volumes. Nothing is sent to the cloud.
+
+| Volume | Contents | Docker volume name |
+|---|---|---|
+| Database | All transactions, accounts, budgets, rules, settings | `firefly-docker_firefly_iii_db` |
+| Uploads | Attached receipts and imported files | `firefly-docker_firefly_iii_upload` |
+
+The underlying database engine is **MariaDB** (MySQL-compatible), running inside its own container. Connection credentials are stored in `.firefly-docker/.db.env` and `.firefly-docker/.env`.
+
+To back up your data, export a dump from the running database container (the password is stored in `.firefly-docker/.db.env` under `MYSQL_PASSWORD`):
+
+```bash
+docker exec firefly_iii_db mysqldump -u firefly --password="YOUR_MYSQL_PASSWORD" firefly > firefly-backup-$(date +%Y%m%d).sql
+```
+
+## Importing Statements
+
+A local statement parser is included to convert bank and credit card exports into Firefly III Data Importer-compatible CSV files. **All processing happens locally — no data is sent anywhere.**
+
+### Supported formats
+
+| Source | File type | Example filename |
+|---|---|---|
+| Bank of America Checking (Debit) | CSV | `stmt.csv` |
+| Chase Freedom Unlimited (Credit) | CSV | `Chase****_Activity*.csv` |
+| Bank of America Cash Rewards (Credit) | CSV | `MonthYear_****.csv` |
+| Apple Card (Credit) | PDF | `Apple Card Statement - February 2026.pdf` |
+
+### How to use
+
+1. **Drop files** into `statements/inbox/`
+2. **Run the parser** — either:
+   - Select **Import Statements** from `Firefly III.app`, or
+   - Run from terminal: `python3 scripts/parse-statements.py`
+3. **Review the preview** — the parser shows every transaction and asks you to confirm before writing
+4. **Import into Firefly III** — upload the generated CSV + JSON config from `statements/output/` into the [Firefly III Data Importer](https://docs.firefly-iii.org/how-to/data-importer/)
+
+### What the parser does
+
+- Detects credit card payments and inter-account transfers automatically and **excludes them** to avoid duplicate transactions (e.g. paying off a Chase card from your BofA checking)
+- Generates a stable `external-id` per transaction so the Data Importer can deduplicate if you re-import
+- Tracks processed files (by content hash + modification date) to warn you about re-uploads
+- Preserves categories from sources that provide them (e.g. Chase "Food & Drink")
+
+### First-time setup
+
+```bash
+pip3 install -r scripts/requirements.txt
+```
+
+This installs `pdfplumber` for PDF statement parsing. The macOS app handles this automatically.
 
 ## Contributing
 

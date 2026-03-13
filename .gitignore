@@ -28,3 +28,29 @@ public/v1/js/webhooks
 resources/assets/v2/node_modules
 resources/assets/v2/build
 public/v2/i18n
+
+
+# Ignore local Docker runtime config (contains secrets)
+.firefly-docker/
+
+# Ignore financial statements (sensitive personal data)
+statements/
+
+# Ignore scripts (contain personal financial data)
+scripts/
+
+# Ignore Claude Code local settings (may contain tokens in command history)
+.claude/
+
+# Ignore Codacy local analysis
+.codacy/
+
+# Ignore macOS metadata
+.DS_Store
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
