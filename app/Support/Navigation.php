@@ -422,9 +422,9 @@ class Navigation
      */
     public function getViewRange(bool $correct): string
     {
-        $range = Preferences::get('viewRange', '1M')->data ?? '1M';
+        $range = Preferences::get('viewRange', 'last30')->data ?? 'last30';
         if (is_array($range)) {
-            $range = '1M';
+            $range = 'last30';
         }
         $range = (string) $range;
         if (!$correct) {

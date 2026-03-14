@@ -220,6 +220,34 @@
                         <td class="hidden-sm hidden-xs">&nbsp;</td><!-- repeats -->
                     </tr>
                 {% endif %}
+                {% if '0' != sum.yearly_total %}
+                    <tr>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                        <td colspan="2" style="text-align: right;">
+                            <small>{{ 'yearly_total'|_ }} ({{ sum.currency_name }}) ({{ 'active_bills_only'|_ }})</small>
+                        </td>
+                        <td style="text-align: right;">
+                            {{ formatAmountBySymbol(sum.yearly_total, sum.currency_symbol, sum.currency_decimal_places) }}
+                        </td>
+                        <td>&nbsp;</td>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                        <td colspan="2" style="text-align: right;">
+                            <small>{{ 'monthly_average'|_ }} ({{ sum.currency_name }}) ({{ 'active_bills_only'|_ }})</small>
+                        </td>
+                        <td style="text-align: right;">
+                            {{ formatAmountBySymbol(sum.monthly_avg, sum.currency_symbol, sum.currency_decimal_places) }}
+                        </td>
+                        <td>&nbsp;</td>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                        <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
         {% endif %}
@@ -259,6 +287,34 @@
                     <td>&nbsp;</td> <!-- paid in period -->
                     <td class="hidden-sm hidden-xs">&nbsp;</td> <!-- next expected match -->
                     <td class="hidden-sm hidden-xs">&nbsp;</td><!-- repeats -->
+                </tr>
+            {% endif %}
+            {% if '0' != sum.yearly_total %}
+                <tr>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    <td colspan="2" style="text-align: right;">
+                        <small>{{ 'yearly_total'|_ }} ({{ sum.currency_name }}) ({{ 'active_bills_only_total'|_ }})</small>
+                    </td>
+                    <td style="text-align: right;">
+                        {{ formatAmountBySymbol(sum.yearly_total, sum.currency_symbol, sum.currency_decimal_places) }}
+                    </td>
+                    <td>&nbsp;</td>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    <td colspan="2" style="text-align: right;">
+                        <small>{{ 'monthly_average'|_ }} ({{ sum.currency_name }}) ({{ 'active_bills_only_total'|_ }})</small>
+                    </td>
+                    <td style="text-align: right;">
+                        {{ formatAmountBySymbol(sum.monthly_avg, sum.currency_symbol, sum.currency_decimal_places) }}
+                    </td>
+                    <td>&nbsp;</td>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
+                    <td class="hidden-sm hidden-xs">&nbsp;</td>
                 </tr>
             {% endif %}
         {% endfor %}

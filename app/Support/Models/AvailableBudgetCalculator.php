@@ -108,8 +108,8 @@ class AvailableBudgetCalculator
         $this->abRepository->setUser($user);
         $this->blRepository->setUser($user);
 
-        $viewRange          = Preferences::getForUser($user, 'viewRange', '1M')->data;
-        $viewRange          = !is_string($viewRange) ? '1M' : $viewRange;
+        $viewRange          = Preferences::getForUser($user, 'viewRange', 'last30')->data;
+        $viewRange          = !is_string($viewRange) ? 'last30' : $viewRange;
         $this->viewRange    = $this->correctViewRange($viewRange);
     }
 

@@ -59,7 +59,7 @@ class ExplainAvailableBudget extends Command
     public function handle(): int
     {
         $date  = $this->getDate((string) $this->option('date'));
-        $range = Preferences::getForUser($this->getUser(), 'viewRange', '1M')->data ?? '1M';
+        $range = Preferences::getForUser($this->getUser(), 'viewRange', 'last30')->data ?? 'last30';
         $title = Navigation::periodShow($date, $range);
         $this->line('This command explains why the "available" budget bar at the top of your /budget bar means.');
         $this->line(sprintf(

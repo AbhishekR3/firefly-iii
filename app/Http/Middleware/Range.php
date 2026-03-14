@@ -123,9 +123,9 @@ class Range
         // ignore preference. set the range to be the current month:
         if (!app('session')->has('start') && !app('session')->has('end')) {
             Log::debug('setRange: Session has no start or end.');
-            $viewRange = Preferences::get('viewRange', '1M')->data;
+            $viewRange = Preferences::get('viewRange', 'last30')->data;
             if (is_array($viewRange)) {
-                $viewRange = '1M';
+                $viewRange = 'last30';
             }
 
             $today     = today(config('app.timezone'));

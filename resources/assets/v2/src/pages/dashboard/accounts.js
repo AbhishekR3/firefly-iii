@@ -280,7 +280,7 @@ export default () => ({
     init() {
         // console.log('accounts init');
         Promise.all([
-            getVariable('viewRange', '1M'), // 0
+            getVariable('viewRange', 'last30'), // 0
             getVariable('convert_to_primary', false), // 1
             getVariable('language', 'en_US'), // 2
             getConfiguration('cer.enabled', false) // 3

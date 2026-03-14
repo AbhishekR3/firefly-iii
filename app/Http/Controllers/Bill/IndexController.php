@@ -76,7 +76,7 @@ final class IndexController extends Controller
         $this->repository->correctTransfers();
         $start       = session('start')->clone();
         $end         = session('end')->clone();
-        $viewRange   = Preferences::get('viewRange', '1M')->data;
+        $viewRange   = Preferences::get('viewRange', 'last30')->data;
 
         // give the end some extra space when the user has last7, last30 or last90.
         if ('last7' === $viewRange || 'last30' === $viewRange) {
@@ -165,6 +165,14 @@ final class IndexController extends Controller
         return response()->json(['data' => 'OK']);
     }
 
+    private function amountPerYear(array $bill): string
+    {
+        $avg        = bcdiv(bcadd((string) $bill['amount_min'], (string) $bill['amount_max']), '2');
+        $multiplies = ['yearly'    => '1', 'half-year' => '2', 'quarterly' => '4', 'monthly'   => '12', 'weekly'    => '52.17', 'daily'     => '365.24'];
+
+        return bcmul($avg, bcdiv($multiplies[$bill['repeat_freq']], (string) ($bill['skip'] + 1)));
+    }
+
     private function amountPerPeriod(array $bill, string $range): string
     {
         $avg        = bcdiv(bcadd((string) $bill['amount_min'], (string) $bill['amount_max']), '2');
@@ -235,6 +243,8 @@ final class IndexController extends Controller
                     'total_left_to_pay'       => '0',
                     'period'                  => $range,
                     'per_period'              => '0',
+                    'yearly_total'            => '0',
+                    'monthly_avg'             => '0',
                 ];
                 Log::debug(sprintf(
                     'Start with avg:%s, total_left_to_pay:%s, per_period:%s',
@@ -277,6 +287,11 @@ final class IndexController extends Controller
                 Log::debug(sprintf('Add amount %s to per_period', $perPeriod));
                 // fill in per period regardless:
                 $sums[$groupOrder][$currencyId]['per_period'] = bcadd($sums[$groupOrder][$currencyId]['per_period'], $perPeriod);
+
+                // yearly total and monthly average:
+                $yearlyAmount                                     = $this->amountPerYear($bill);
+                $sums[$groupOrder][$currencyId]['yearly_total']   = bcadd($sums[$groupOrder][$currencyId]['yearly_total'], $yearlyAmount);
+                $sums[$groupOrder][$currencyId]['monthly_avg']    = bcdiv($sums[$groupOrder][$currencyId]['yearly_total'], '12');
             }
         }
 
@@ -308,9 +323,13 @@ final class IndexController extends Controller
                     'avg'                     => '0',
                     'period'                  => $entry['period'],
                     'per_period'              => '0',
+                    'yearly_total'            => '0',
+                    'monthly_avg'             => '0',
                 ];
-                $totals[$currencyId]['avg']        = bcadd($totals[$currencyId]['avg'], (string) $entry['avg']);
-                $totals[$currencyId]['per_period'] = bcadd($totals[$currencyId]['per_period'], (string) $entry['per_period']);
+                $totals[$currencyId]['avg']          = bcadd($totals[$currencyId]['avg'], (string) $entry['avg']);
+                $totals[$currencyId]['per_period']   = bcadd($totals[$currencyId]['per_period'], (string) $entry['per_period']);
+                $totals[$currencyId]['yearly_total'] = bcadd($totals[$currencyId]['yearly_total'], (string) $entry['yearly_total']);
+                $totals[$currencyId]['monthly_avg']  = bcdiv($totals[$currencyId]['yearly_total'], '12');
             }
         }
 

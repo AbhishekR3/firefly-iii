@@ -558,7 +558,7 @@ final class DebugController extends Controller
             'locale_attempts'    => $localeAttempts,
             'locale'             => Steam::getLocale(),
             'language'           => Steam::getLanguage(),
-            'view_range'         => Preferences::get('viewRange', '1M')->data,
+            'view_range'         => Preferences::get('viewRange', 'last30')->data,
         ];
     }
 }

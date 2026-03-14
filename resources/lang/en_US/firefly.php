@@ -230,6 +230,8 @@ return [
     'per_period_sum_3M'                                   => 'Expected quarterly costs',
     'per_period_sum_6M'                                   => 'Expected half-yearly costs',
     'per_period_sum_1Y'                                   => 'Expected yearly costs',
+    'yearly_total'                                        => 'Yearly total',
+    'monthly_average'                                     => 'Monthly average',
     'average_per_bill'                                    => 'average per subscription',
     'expected_total'                                      => 'expected total',
     'reconciliation_account_name'                         => ':name reconciliation (:currency)',
